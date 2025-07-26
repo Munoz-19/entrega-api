@@ -10,6 +10,25 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 
+// Crear tabla si no existe
+const createTableIfNotExists = async () => {
+  try {
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS entregas (
+        id SERIAL PRIMARY KEY,
+        foto TEXT,
+        firma TEXT,
+        comentario TEXT,
+        checklist JSONB,
+        fecha TEXT
+      )
+    `);
+    console.log('Tabla "entregas" verificada o creada.');
+  } catch (error) {
+    console.error('Error creando tabla:', error);
+  }
+};
+
 app.post('/api/entregas', async (req, res) => {
   const { foto, firma, comentario, checklist, fecha } = req.body;
 
@@ -36,6 +55,7 @@ app.get('/api/entregas', async (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
   console.log(`API escuchando en puerto ${PORT}`);
+  await createTableIfNotExists();
 });
